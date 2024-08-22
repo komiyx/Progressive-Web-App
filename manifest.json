@@ -1,0 +1,15 @@
+{
+    "name": "TestPWA",
+    "start_url": "./assets/load.html",
+    "display": "standalone",
+    "icons": [
+        {
+            "src": "./image/logo.png",
+            "type": "image/png",
+            "sizes": "512x512"
+        }
+    ],
+    "theme_color": "#000000",
+    "background_color": "#000000"
+}
+

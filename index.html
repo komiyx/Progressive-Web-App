@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="">
+  <title>PWA TEST</title>
+  <link rel="preload" as="style" onload="this.onload=null; this.rel='stylesheet'" href="./css/style.css">
+  <link rel="preload" as="style" onload="this.onload=null; this.rel='stylesheet'"
+    href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css"
+    integrity="sha512-jnSuA4Ss2PkkikSOLtYs8BlYIeeIK1h99ty4YfvRPAlzr377vr3CXDb7sb7eEEBYjDtcYj+AjBH3FLv5uSJuXg=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="manifest" href="./manifest.json" />
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+    import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-messaging.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDVCPlsL6BQIxcM3OIIRpJ7LL-fOegjMEU",
+      authDomain: "testpwa-17f02.firebaseapp.com",
+      projectId: "testpwa-17f02",
+      storageBucket: "testpwa-17f02.appspot.com",
+      messagingSenderId: "939437110766",
+      appId: "1:939437110766:web:26bf0fca736efdf65ccaff",
+      measurementId: "G-7BBNR23EX3"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const messaging = getMessaging(app);
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('firebase-messaging-sw.js')
+        .then((registration) => {
+          console.log('Service Worker registered with scope:', registration.scope);
+        }).catch((error) => {
+          console.log('Service Worker registration failed:', error);
+        });
+
+      let deferredPrompt;
+      window.addEventListener('beforeinstallprompt', event => {
+        event.preventDefault();
+        deferredPrompt = event;
+
+        const installButtons = document.querySelectorAll('.installApp');
+        installButtons.forEach(installButton => {
+          installButton.addEventListener('click', () => {
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then((choiceResult) => {
+              if (choiceResult.outcome === 'accepted') {
+                console.log('User accepted the install prompt');
+              } else {
+                console.log('User dismissed the install prompt');
+              }
+              deferredPrompt = null;
+            });
+          });
+        });
+      });
+
+      window.addEventListener('appinstalled', (event) => {
+        window.location.href = './assets/load.html';
+      });
+
+
+      // chrome 浏览器判断
+      if (window.matchMedia('(display-mode: standalone)').matches) {
+        // 已经安装的启动方式
+        console.log('display-mode 是 standalone');
+      }
+      // Safari 判断：
+      if (window.navigator.standalone === true) {
+        // 安装程序启动的时候，页面每次刷新会执行
+        console.log('display-mode 是 standalone');
+      }
+    }
+
+    Notification.requestPermission().then((permission) => {
+      if (permission === 'granted') {
+        console.log('Notification permission granted.');
+
+        getToken(messaging, { vapidKey: 'BKlyZGQuJHAaBHJSfZITAMlUBkOUrZooM3iTIJUQCuk2d2w6ZGjQI6arCGFKt4AfBN8LGbJ8Y2n-cfMt1GpxiNM' }).then((currentToken) => {
+          if (currentToken) {
+            console.log('FCM Token:', currentToken);
+          } else {
+            console.log('No registration token available. Request permission to generate one.');
+          }
+        }).catch((err) => {
+          console.log('An error occurred while retrieving token. ', err);
+        });
+      } else {
+        console.log('Unable to get permission to notify.');
+      }
+    });
+
+    onMessage(messaging, (payload) => {
+      console.log('Message received. ', payload);
+      const notificationTitle = payload.notification.title;
+      const notificationOptions = {
+        body: payload.notification.body,
+        icon: payload.notification.icon
+      };
+
+      new Notification(notificationTitle, notificationOptions);
+    });
+  </script>
+  <script src="./axios.min.js"></script>
+
+</head>
+
+<body>
+  <main class="d-lg-flex">
+    <section class="position-relative d-lg-inline-block mx-lg-auto">
+      <picture>
+        <source type="image/webp" srcset="./image/bg.webp">
+        <img src="./image/bg.jpg" id="bg" alt="bg">
+      </picture>
+      <div class="position-absolute w-100 text-center redirect-btn">
+        <a href="#" class="installApp">
+          <picture>
+            <source type="image/webp" srcset="./image/tombol/btn.webp">
+            <img src="./image/tombol/btn.png" id="tekan" alt="btn">
+          </picture>
+        </a>
+      </div>
+    </section>
+  </main>
+
+</body>
+
+</html>
